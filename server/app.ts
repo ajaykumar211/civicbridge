@@ -15,29 +15,32 @@ app.use(express.json({ limit: "10mb" }));
 app.use(cookieParser());
 app.use(authMiddleware);
 
-// Base healthcheck
-app.get("/api/health", (req, res) => {
+// API Router
+const apiRouter = express.Router();
+
+apiRouter.get("/health", (req, res) => {
   res.json({ status: "healthy", service: "CivicBridge API", time: new Date().toISOString() });
 });
 
-// Mount Routes
-app.use("/api/auth", authRouter);
-app.use("/api/problems", problemsRouter);
-app.use("/api", projectsRouter);
-app.use("/api", sponsorshipsRouter);
-app.use("/api", analyticsRouter);
-app.use("/api", reportsRouter);
-app.use("/api/admin", adminRouter);
+apiRouter.use("/auth", authRouter);
+apiRouter.use("/problems", problemsRouter);
+apiRouter.use(projectsRouter);
+apiRouter.use(sponsorshipsRouter);
+apiRouter.use(analyticsRouter);
+apiRouter.use(reportsRouter);
+apiRouter.use("/admin", adminRouter);
 
-// File Upload endpoint (data URL / local media storage)
-app.post("/api/upload", (req, res) => {
+apiRouter.post("/upload", (req, res) => {
   const { data_url, filename } = req.body;
   if (!data_url) {
     return res.status(400).json({ error: { code: "NO_FILE", message: "Data URL is required" } });
   }
-  // Returns safe persistent URL (the data url itself or hosted URI)
   return res.json({ url: data_url, filename: filename || "upload.png" });
 });
+
+// Mount router under /api AND under root to handle Vercel serverless function rewrites seamlessly
+app.use("/api", apiRouter);
+app.use(apiRouter);
 
 // Centralized error handler
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
