@@ -1,0 +1,8 @@
+{
+  "name": "CivicBridge",
+  "description": "AI-Powered Platform Crowdsourcing Societal Problems and Connecting Universities and Industry for Real Impact.",
+  "requestFramePermissions": ["geolocation"],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
